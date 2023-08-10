@@ -9,7 +9,7 @@ var result = from trd in dbContext.TrdReal
                      where innerPiutang.TanggalBunga >= dtAwalValue && innerPiutang.TanggalBunga <= dtAkhirValue
                      group innerPiutang by new { innerPiutang.Bilyet, innerPiutang.TanggalPiutang } into g
                      select new { Bilyet = g.Key.Bilyet, TanggalPiutang = g.Key.TanggalPiutang, Line = g.Max(x => x.Line) }
-                 ) on new { piutang.Bilyet, piutang.TanggalPiutang, Line = piutang.Line } equals new { tes.Bilyet, tes.TanggalPiutang, Line = tes.Line }
+                 ) on new { piutang.Bilyet, piutang.TanggalPiutang, piutang.Line } equals new { tes.Bilyet, tes.TanggalPiutang, tes.Line }
                  where piutang.TanggalBunga >= dtAwalValue && piutang.TanggalBunga <= dtAkhirValue
                  group piutang by new { piutang.Bilyet, piutang.TanggalBunga } into g
                  select new

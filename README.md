@@ -1,28 +1,21 @@
-DateTime dtAwalValue = dtAwal.Value;
-DateTime dtAkhirValue = dtAkhir.Value;
-
-var piutangGrouped = (
+// Step 1: Get the grouped Piutang data
+var groupedPiutang = (
     from piutang in dbContext.Piutang
-    join innerPiutang in (
-        from ip in dbContext.Piutang
-        where ip.TanggalBunga >= dtAwalValue && ip.TanggalBunga <= dtAkhirValue
-        group ip by new { ip.Bilyet } into g
-        select new { Bilyet = g.Key.Bilyet, TanggalPiutang = g.Max(x => x.TanggalPiutang), Line = g.Max(x => x.Line) }
-    ) on new { piutang.Bilyet, piutang.TanggalPiutang, piutang.Line } equals new { innerPiutang.Bilyet, innerPiutang.TanggalPiutang, innerPiutang.Line }
     where piutang.TanggalBunga >= dtAwalValue && piutang.TanggalBunga <= dtAkhirValue
-    group piutang by new { piutang.Bilyet, piutang.TanggalBunga } into g
+    group piutang by new { piutang.Bilyet, piutang.TanggalPiutang } into g
     select new
     {
         Bilyet = g.Key.Bilyet,
-        TanggalBunga = g.Key.TanggalBunga,
+        TanggalPiutang = g.Key.TanggalPiutang,
         BiayaPiutang = g.Sum(x => x.Biaya),
         PiutangBayar = g.Sum(x => x.PiutangBayar)
     }
-);
+).ToList(); // Execute the query and store the result in memory
 
+// Step 2: Join TRD_REAL with the grouped Piutang data
 var result = (
     from trd in dbContext.TrdReal
-    join pg in piutangGrouped on new { trd.Bilyet, trd.TanggalBayar } equals new { pg.Bilyet, pg.TanggalBunga }
+    join pg in groupedPiutang on new { trd.Bilyet, trd.TanggalBayar } equals new { pg.Bilyet, pg.TanggalPiutang }
     where trd.TanggalBayar >= dtAwalValue && trd.TanggalBayar <= dtAkhirValue
     select new
     {

@@ -7,8 +7,8 @@ var result = from trd in dbContext.TrdReal
                  join tes in (
                      from innerPiutang in dbContext.Piutang
                      where innerPiutang.TanggalBunga >= dtAwalValue && innerPiutang.TanggalBunga <= dtAkhirValue
-                     group innerPiutang by new { innerPiutang.Bilyet, innerPiutang.TanggalPiutang } into g
-                     select new { Bilyet = g.Key.Bilyet, TanggalPiutang = g.Key.TanggalPiutang, Line = g.Max(x => x.Line) }
+                     group innerPiutang by new { innerPiutang.Bilyet } into g
+                     select new { Bilyet = g.Key.Bilyet, TanggalPiutang = g.Max(x => x.TanggalPiutang), Line = g.Max(x => x.Line) }
                  ) on new { piutang.Bilyet, piutang.TanggalPiutang, piutang.Line } equals new { tes.Bilyet, tes.TanggalPiutang, tes.Line }
                  where piutang.TanggalBunga >= dtAwalValue && piutang.TanggalBunga <= dtAkhirValue
                  group piutang by new { piutang.Bilyet, piutang.TanggalBunga } into g

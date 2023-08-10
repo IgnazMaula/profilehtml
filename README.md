@@ -3,26 +3,26 @@ using System.Linq;
 
 // Assuming you have an Entity Framework DbContext named 'YourDbContext'
 
-var piutangSubquery = from piutang in YourDbContext.Piutang
+var piutangSubquery = from p1 in YourDbContext.Piutang
                       join tesSubquery in (
-                          from p in YourDbContext.Piutang
-                          where p.TanggalBunga >= dtAwal.Value && p.TanggalBunga <= dtAkhir.Value
-                          group p by new { p.Bilyet, p.TanggalPiutang } into g
+                          from p2 in YourDbContext.Piutang
+                          where p2.TanggalBunga >= dtAwal.Value && p2.TanggalBunga <= dtAkhir.Value
+                          group p2 by new { p2.Bilyet, p2.TanggalPiutang } into g
                           select new
                           {
                               Bilyet = g.Key.Bilyet,
                               TanggalPiutang = g.Key.TanggalPiutang,
-                              MaxLine = g.Max(p => p.Line)
+                              MaxLine = g.Max(p2 => p2.Line)
                           }
-                      ) on new { piutang.Bilyet, piutang.TanggalPiutang, piutang.Line } equals new { tesSubquery.Bilyet, tesSubquery.TanggalPiutang, Line = tesSubquery.MaxLine }
+                      ) on new { p1.Bilyet, p1.TanggalPiutang, p1.Line } equals new { tesSubquery.Bilyet, tesSubquery.TanggalPiutang, Line = tesSubquery.MaxLine }
                       into piutangJoin
                       from piutangResult in piutangJoin.DefaultIfEmpty()
-                      where piutangResult.TanggalBunga >= dtAwal.Value && piutangResult.TanggalBunga <= dtAkhir.Value
-                      group piutangResult by new { piutangResult.Bilyet, piutangResult.TanggalBunga } into g
+                      where piutangResult != null && piutangResult.TanggalPiutang >= dtAwal.Value && piutangResult.TanggalPiutang <= dtAkhir.Value
+                      group piutangResult by new { piutangResult.Bilyet, piutangResult.TanggalPiutang } into g
                       select new
                       {
                           Bilyet = g.Key.Bilyet,
-                          TanggalBunga = g.Key.TanggalBunga,
+                          TanggalBunga = g.Key.TanggalPiutang,
                           BiayaPiutang = g.Sum(p => p.Biaya),
                           PiutangBayar = g.Sum(p => p.PiutangBayar)
                       };

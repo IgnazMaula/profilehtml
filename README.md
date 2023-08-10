@@ -17,8 +17,8 @@ var piutangSubquery = from piutang in YourDbContext.Piutang
                       ) on new { piutang.Bilyet, piutang.TanggalPiutang, piutang.Line } equals new { tesSubquery.Bilyet, tesSubquery.TanggalPiutang, Line = tesSubquery.MaxLine }
                       into piutangJoin
                       from piutangResult in piutangJoin.DefaultIfEmpty()
-                      where piutang.TanggalBunga >= dtAwal.Value && piutang.TanggalBunga <= dtAkhir.Value
-                      group piutang by new { piutang.Bilyet, piutang.TanggalBunga } into g
+                      where piutangResult.TanggalBunga >= dtAwal.Value && piutangResult.TanggalBunga <= dtAkhir.Value
+                      group piutangResult by new { piutangResult.Bilyet, piutangResult.TanggalBunga } into g
                       select new
                       {
                           Bilyet = g.Key.Bilyet,
@@ -28,7 +28,7 @@ var piutangSubquery = from piutang in YourDbContext.Piutang
                       };
 
 var query = from trd in YourDbContext.TrdReal
-            join piutang in piutangSubquery on new { trd.Bilyet, trd.TanggalBayar } equals new { Bilyet = piutang.Bilyet, TanggalBayar = piutang.TanggalBunga } into joinedPiutang
+            join piutang in piutangSubquery on new { trd.Bilyet, trd.TanggalBayar } equals new { piutang.Bilyet, piutang.TanggalBunga } into joinedPiutang
             from piutangResult in joinedPiutang.DefaultIfEmpty()
             where trd.TanggalBayar >= dtAwal.Value && trd.TanggalBayar <= dtAkhir.Value && MyFilterConditions
             orderby trd.TanggalBayar descending

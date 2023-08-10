@@ -1,20 +1,17 @@
-using System;
-using System.Linq;
 
-// Assuming you have an Entity Framework DbContext named 'YourDbContext'
 
-var piutangSubquery = from p1 in YourDbContext.Piutang
+var piutangSubquery = from piutang in YourDbContext.Piutang
                       join tesSubquery in (
-                          from p2 in YourDbContext.Piutang
-                          where p2.TanggalBunga >= dtAwal.Value && p2.TanggalBunga <= dtAkhir.Value
-                          group p2 by new { p2.Bilyet, p2.TanggalPiutang } into g
+                          from p in YourDbContext.Piutang
+                          where p.TanggalBunga >= dtAwal.Value && p.TanggalBunga <= dtAkhir.Value
+                          group p by new { p.Bilyet, p.TanggalPiutang } into g
                           select new
                           {
                               Bilyet = g.Key.Bilyet,
                               TanggalPiutang = g.Key.TanggalPiutang,
-                              MaxLine = g.Max(p2 => p2.Line)
+                              MaxLine = g.Max(p => p.Line)
                           }
-                      ) on new { p1.Bilyet, p1.TanggalPiutang, p1.Line } equals new { tesSubquery.Bilyet, tesSubquery.TanggalPiutang, Line = tesSubquery.MaxLine }
+                      ) on new { piutang.Bilyet, piutang.TanggalPiutang, piutang.Line } equals new { tesSubquery.Bilyet, tesSubquery.TanggalPiutang, Line = tesSubquery.MaxLine }
                       into piutangJoin
                       from piutangResult in piutangJoin.DefaultIfEmpty()
                       where piutangResult != null && piutangResult.TanggalPiutang >= dtAwal.Value && piutangResult.TanggalPiutang <= dtAkhir.Value
@@ -23,7 +20,7 @@ var piutangSubquery = from p1 in YourDbContext.Piutang
                       {
                           Bilyet = g.Key.Bilyet,
                           TanggalBunga = g.Key.TanggalPiutang,
-                          BiayaPiutang = g.Sum(p => p.Biaya),
+                          Biaya = g.Sum(p => p.Biaya),
                           PiutangBayar = g.Sum(p => p.PiutangBayar)
                       };
 
@@ -36,10 +33,10 @@ var query = from trd in YourDbContext.TrdReal
             {
                 trd.TanggalBayar,
                 Bilyet = trd.Bilyet,
-                PiutangTotal = trd.BungaHitung - (piutangResult?.BiayaPiutang ?? 0) - (piutangResult?.PiutangBayar ?? 0),
+                PiutangTotal = trd.BungaHitung - (piutangResult?.Biaya ?? 0) - (piutangResult?.PiutangBayar ?? 0),
                 PiutangBayar = piutangResult?.PiutangBayar ?? 0,
-                PiutangSisa = trd.BungaHitung - (piutangResult?.Biaya ?? 0) - (piutangResult?.PiutangBayar ?? 0) - (piutangResult?.BiayaPiutang ?? 0),
-                Piutang = piutangResult?.BiayaPiutang,
+                PiutangSisa = trd.BungaHitung - (piutangResult?.Biaya ?? 0) - (piutangResult?.PiutangBayar ?? 0) - (piutangResult?.Biaya ?? 0),
+                Piutang = piutangResult?.Biaya ?? 0,
                 Lunas = trd.Lunas
             };
 

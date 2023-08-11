@@ -1,12 +1,45 @@
-select TRD_REAL.TanggalBayar, TRD_REAL.Bilyet as Bilyet,
-BungaHitung-isnull(Bunga,0)-BiayaPiutang-isnull(Biaya,0) PiutangTotal,
-isnull(PiutangBayar,0) PiutangBayar,
-BungaHitung-isnull(Bunga,0)-isnull(Biaya,0)-isnull(PiutangBayar,0)-BiayaPiutang PiutangSisa, Piutang, Lunas
-from trd_real left join
-(select sum(Biaya) BiayaPiutang,Bilyet, TANGGALBUNGA, sum(PiutangBayar) PiutangBayar from Piutang
-inner join (select Bilyet bil,max(TanggalPiutang) tgl,max(line) baris from piutang 
-where TanggalBunga between 'startDate' and 'endDate'  group by Bilyet, TanggalPiutang) TES on TES.baris = line and tes.tgl = TanggalPiutang and tes.bil = Bilyet 
-where TanggalBunga between 'startDate' and 'endDate'  group by Bilyet, TANGGALBUNGA)
-Piutang on Piutang.Bilyet=TRD_REAL.Bilyet and Piutang.TanggalBunga=TRD_REAL.TanggalBayar
-where TanggalBayar between 'startDate' and 'endDate'
-order by TanggalBayar Desc
+var startDate = new DateTime(/* specify your start date */);
+var endDate = new DateTime(/* specify your end date */);
+
+var result = from trd in context.TRD_REAL
+             where trd.TanggalBayar >= startDate && trd.TanggalBayar <= endDate
+             join piutang in
+                 (from pt in context.Piutang
+                  join tes in
+                      (from pt2 in context.Piutang
+                       where pt2.TanggalBunga >= startDate && pt2.TanggalBunga <= endDate
+                       group pt2 by new { pt2.Bilyet, pt2.TANGGALBUNGA } into g
+                       select new
+                       {
+                           g.Key.Bilyet,
+                           g.Key.TANGGALBUNGA,
+                           Baris = g.Max(x => x.line),
+                           Tgl = g.Max(x => x.TanggalPiutang)
+                       })
+                  on new { pt.line, pt.TanggalPiutang, pt.Bilyet } equals new { line = tes.Baris, TanggalPiutang = tes.Tgl, tes.Bilyet }
+                  where pt.TanggalBunga >= startDate && pt.TanggalBunga <= endDate
+                  group pt by new { pt.Bilyet, pt.TANGGALBUNGA } into g
+                  select new
+                  {
+                      g.Key.Bilyet,
+                      g.Key.TANGGALBUNGA,
+                      BiayaPiutang = g.Sum(x => x.Biaya),
+                      PiutangBayar = g.Sum(x => x.PiutangBayar)
+                  })
+             on new { trd.Bilyet, trd.TanggalBayar } equals new { piutang.Bilyet, piutang.TANGGALBUNGA } into piutangJoin
+             from piutangData in piutangJoin.DefaultIfEmpty()
+             let PiutangTotal = trd.BungaHitung - (piutangData.BiayaPiutang ?? 0) - (trd.Biaya ?? 0)
+             let PiutangBayar = piutangData.PiutangBayar ?? 0
+             let PiutangSisa = PiutangTotal - PiutangBayar - (trd.BiayaPiutang ?? 0)
+             select new
+             {
+                 trd.TanggalBayar,
+                 trd.Bilyet,
+                 PiutangTotal,
+                 PiutangBayar,
+                 PiutangSisa,
+                 trd.Piutang,
+                 trd.Lunas
+             };
+
+var orderedResult = result.OrderByDescending(r => r.TanggalBayar);

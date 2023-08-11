@@ -12,6 +12,7 @@ var result = from tr in context.TRD_REAL
                      PiutangBayar = g.Sum(p => p.PiutangBayar)
                  }
              )
+             let trBiayaPiutang = tr.BiayaPiutang  // Assuming this is the correct property
              from pi in piGroup
                  .Where(p => p.Bilyet == tr.Bilyet && p.TanggalBunga == tr.TanggalBayar)
                  .DefaultIfEmpty()
@@ -22,7 +23,7 @@ var result = from tr in context.TRD_REAL
                  tr.Bilyet,
                  PiutangTotal = tr.BungaHitung - (pi.BiayaPiutang ?? 0) - tr.Biaya - (pi.PiutangBayar ?? 0),
                  PiutangBayar = pi.PiutangBayar ?? 0,
-                 PiutangSisa = tr.BungaHitung - (pi.BiayaPiutang ?? 0) - tr.Biaya - (pi.PiutangBayar ?? 0) - tr.BiayaPiutang,
+                 PiutangSisa = tr.BungaHitung - (pi.BiayaPiutang ?? 0) - tr.Biaya - (pi.PiutangBayar ?? 0) - (trBiayaPiutang ?? 0),
                  tr.Piutang,
                  tr.Lunas
              };

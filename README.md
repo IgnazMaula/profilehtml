@@ -1,12 +1,6 @@
 var result = from tr in context.TRD_REAL
              join pi in (
                  from p in context.Piutang
-                 join tes in (
-                     from t in context.Piutang
-                     where t.TanggalBunga >= startDate && t.TanggalBunga <= endDate
-                     group t by new { t.Bilyet, t.TanggalPiutang } into g
-                     select new { Bilyet = g.Key.Bilyet, TanggalPiutang = g.Key.TanggalPiutang, Baris = g.Max(t => t.Line) }
-                 ) on new { p.Bilyet, p.TanggalPiutang, Line = p.Line } equals new { Bilyet = tes.Bilyet, TanggalPiutang = tes.TanggalPiutang, Line = tes.Baris }
                  where p.TanggalBunga >= startDate && p.TanggalBunga <= endDate
                  group p by new { p.Bilyet, p.TanggalBunga } into g
                  select new

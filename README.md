@@ -14,6 +14,9 @@ order by TanggalBayar Desc
 var startDate = new DateTime(2021, 8, 1);
 var endDate = new DateTime(2023, 8, 1);
 
+var startDate = new DateTime(2021, 8, 1);
+var endDate = new DateTime(2023, 8, 1);
+
 var result = (from trd in dbContext.TRD_REAL
               join piutang in
                   (from p in dbContext.Piutang
@@ -51,4 +54,5 @@ var result = (from trd in dbContext.TRD_REAL
                   Piutang = pg.BiayaPiutang ?? 0,
                   Lunas = trd.Lunas
               }).ToList();
+
 

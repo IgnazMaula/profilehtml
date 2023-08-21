@@ -1,65 +1,64 @@
+using System;
+using System.Data.Linq;
+
 public byte UpdateJurnal(string tReffNumber, string tYear, double tValue, int tPeriodNumber, DateTime tDate, string tUser, string tDesc,
     string tCompany = "", string tJournalType = "DPPK", byte tUnposted = 1, byte tUnbalance = 0, string tCurr = "IDR", string tMD = "M",
     double tRate = 1, byte tExport = 0, string tBayarKepada = "", string tNilaiBayar = "0", string tBank = "", string tNoRekening = "")
 {
     try
     {
-        double tDebet = 0;
-        double tKredit = 0;
-        if (tKredit < 0)
+        using (YourDataContext dataContext = new YourDataContext()) // Replace YourDataContext with your actual data context class
         {
-            tDebet = -tKredit;
-        }
-        else if (tDebet < 0)
-        {
-            tKredit = -tDebet;
-        }
+            double tDebet = 0;
+            double tKredit = 0;
+            if (tKredit < 0)
+            {
+                tDebet = -tKredit;
+            }
+            else if (tDebet < 0)
+            {
+                tKredit = -tDebet;
+            }
 
-        string query = $"INSERT INTO GLTRHDSUM(GLTRHD_ReffNumb,GLTRHD_Company,GLTRHD_FiscalYear,GLTRHD_BaseAmmt,GLTRHD_CurrAmmt,GLTRHD_JournType," +
-            $"GLTRHD_Period,GLTRHD_Unposted,GLTRHD_Unbalanced,GLTRHD_EntryDate,GLTRHD_LastEntryDate,GLTRHD_EmpID,GLTRHD_LastEmpID," +
-            $"GLTRHD_TransactionDate,GLTRHD_Currency,GLTRHD_MD,GLTRHD_ExchangeRate,GLTRHD_UserID,GLTRHD_Export,GLTRHD_Note," +
-            $"GLTRHD_UserDef2,GLTRHD_UserDef3,GLTRHD_UserDef6,GLTRHD_UserDef7) VALUES (" +
-            $"'{tReffNumber}'," +
-            $"'{EscapeString(tCompany)}'," +
-            $"'{tYear}'," +
-            $"'{Math.Round(tValue, 0)}'," +
-            $"'{Math.Round(tValue, 0)}'," +
-            $"'{tJournalType}'," +
-            $"'{tPeriodNumber}'," +
-            $"'{tUnposted}'," +
-            $"'{tUnbalance}'," +
-            $"'{tDate:yyyy/MM/dd}'," +
-            $"'{tDate:yyyy/MM/dd}'," +
-            $"'{tUser}'," +
-            $"'{tUser}'," +
-            $"'{tDate:yyyy/MM/dd}'," +
-            $"'{tCurr}'," +
-            $"'{tMD}'," +
-            $"'{tRate}'," +
-            $"'{tUser}'," +
-            $"'{tExport}'," +
-            $"'{EscapeString(tDesc)}'," +
-            $"'{EscapeString(tBayarKepada)}'," +
-            $"'{cNum(tNilaiBayar)}'," +
-            $"'{EscapeString(tBank)}'," +
-            $"'{EscapeString(tNoRekening)}')";
-        
-        // Execute the query using your database connection
-        YourDatabaseConnection.Execute(query);
+            GLTRHDSUM newEntry = new GLTRHDSUM
+            {
+                GLTRHD_ReffNumb = tReffNumber,
+                GLTRHD_Company = tCompany,
+                GLTRHD_FiscalYear = tYear,
+                GLTRHD_BaseAmmt = Math.Round(tValue, 0),
+                GLTRHD_CurrAmmt = Math.Round(tValue, 0),
+                GLTRHD_JournType = tJournalType,
+                GLTRHD_Period = tPeriodNumber,
+                GLTRHD_Unposted = tUnposted,
+                GLTRHD_Unbalanced = tUnbalance,
+                GLTRHD_EntryDate = tDate,
+                GLTRHD_LastEntryDate = tDate,
+                GLTRHD_EmpID = tUser,
+                GLTRHD_LastEmpID = tUser,
+                GLTRHD_TransactionDate = tDate,
+                GLTRHD_Currency = tCurr,
+                GLTRHD_MD = tMD,
+                GLTRHD_ExchangeRate = tRate,
+                GLTRHD_UserID = tUser,
+                GLTRHD_Export = tExport,
+                GLTRHD_Note = tDesc,
+                GLTRHD_UserDef2 = tBayarKepada,
+                GLTRHD_UserDef3 = cNum(tNilaiBayar),
+                GLTRHD_UserDef6 = tBank,
+                GLTRHD_UserDef7 = tNoRekening
+            };
 
-        return 1; // Assuming success
+            dataContext.GLTRHDSUM.InsertOnSubmit(newEntry);
+            dataContext.SubmitChanges();
+
+            return 1; // Assuming success
+        }
     }
     catch (Exception ex)
     {
         Console.WriteLine(ex.Message);
         return 0; // Assuming failure
     }
-}
-
-// Helper method to escape string values for SQL queries
-private string EscapeString(string input)
-{
-    return input.Replace("'", "''");
 }
 
 // Helper method to convert string to numeric value

@@ -75,17 +75,37 @@ private double cNum(string input)
 }
 
 
-    Function ConvertAcn(ByVal acc As String, ByVal Acct As String) As String
-Dim rs As New ADODB.Recordset
+public string ConvertAcn(string acc, string Acct)
+{
+    try
+    {
+        using (YourDataContext dataContext = new YourDataContext()) // Replace YourDataContext with your actual data context class
+        {
+            if (Acct == "A")
+            {
+                var resultA = dataContext.MFCOA
+                    .Where(item => item.MFCOA_Account == acc)
+                    .Select(item => item.MFCOA_Des)
+                    .FirstOrDefault();
 
-    If Acct = "A" Then
-        rs.Open "select * from MFCOA where MFCOA_Account = '" & acc & "' ", GDBConn, adOpenKeyset, adLockOptimistic, adCmdText
-        ConvertAcn = Trim(rs!MFCOA_Des)
-    Else
-        rs.Open "select * from MFSOAM where MFSOAM_SubAccountNbr = '" & acc & "' ", GDBConn, adOpenKeyset, adLockOptimistic, adCmdText
-        ConvertAcn = Trim(rs!MFSOAM_Description)
-    End If
-    rs.Close
-    
-End Function
+                return resultA != null ? resultA.Trim() : "";
+            }
+            else
+            {
+                var resultS = dataContext.MFSOAM
+                    .Where(item => item.MFSOAM_SubAccountNbr == acc)
+                    .Select(item => item.MFSOAM_Description)
+                    .FirstOrDefault();
+
+                return resultS != null ? resultS.Trim() : "";
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        return "";
+    }
+}
+
 

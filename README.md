@@ -1,48 +1,75 @@
-Function UpdateDetailJurnal(ByVal tReffNumber As String, ByVal tLine As Integer, ByVal tAcc As String, ByVal tSubAcc As String, _
-ByVal tDate As Date, ByVal tDesc As String, ByVal tDebet As Double, ByVal tKredit As Double, ByVal tYear As String, ByVal tPeriodNumber As String, _
-Optional ByVal tJenisJurnal As String = "DPPK", Optional ByVal tEntity As String = "", Optional ByVal tProject As String = "", Optional ByVal tCurr As String = "IDR", Optional ByVal tRate As Double = 1, Optional ByVal tModule As String = "", Optional ByVal tUnposted As Byte = 1) As Byte
-On Error GoTo err
-    If tKredit < 0 Then
-        tDebet = -tKredit
-        tKredit = 0
-    ElseIf tDebet < 0 Then
-        tKredit = -tDebet
-        tDebet = 0
-    End If
-    If tDebet + tKredit = 0 Then
-        UpdateDetailJurnal = 1
-        Exit Function
-    End If
-    
-    tDesc = ConvertAcn(tAcc, "A") & " - " & ConvertAcn(tSubAcc, "S")
-    
-    a = "insert into GLTRANSUM(GLTRAN_Company,GLTRAN_ReffNumb,GLTRAN_LineNo,GLTRAN_AccountCode,GLTRAN_JenisJurnal,GLTRAN_SubAccount," & _
-        "GLTRAN_TransDate,GLTRAN_Entity,GLTRAN_Description,GLTRAN_Project,GLTRAN_CurrencyCode,GLTRAN_DebitAmount,GLTRAN_CreditAmount," & _
-        "GLTRAN_BaseDebetAmount,GLTRAN_BaseCreditAmount,GLTRAN_CuEffDate,GLTRAN_CuRate,GLTRAN_FiscalYear,GLTRAN_Module,GLTRAN_PeriodEntry,GLTRAN_PeriodPost,GLTRAN_Unposted) values('" & _
-        "','" & tReffNumber & _
-        "','" & tLine & _
-        "','" & tAcc & _
-        "','" & tJenisJurnal & _
-        "','" & tSubAcc & _
-        "','" & Format(tDate, "yyyy/mm/dd") & _
-        "','" & esc(tEntity) & _
-        "','" & esc(tDesc) & _
-        "','" & esc(tProject) & _
-        "','" & tCurr & _
-        "','" & cNum(tDebet) & _
-        "','" & cNum(tKredit) & _
-        "','" & cNum(tDebet) & _
-        "','" & cNum(tKredit) & _
-        "','" & Format(tDate, "yyyy/mm/dd") & _
-        "','" & tRate & _
-        "','" & tYear & _
-        "','" & tModule & _
-        "','" & tPeriodNumber & _
-        "','" & tPeriodNumber & _
-        "','" & tUnposted & "')"
-    GDBConn.Execute a, b
-    UpdateDetailJurnal = b
-    Exit Function
-err:
-    MsgBox err.Description, vbInformation
-End Function
+public byte UpdateDetailJurnal(string tReffNumber, int tLine, string tAcc, string tSubAcc, DateTime tDate, string tDesc, double tDebet, double tKredit,
+    string tYear, string tPeriodNumber, string tJenisJurnal = "DPPK", string tEntity = "", string tProject = "", string tCurr = "IDR",
+    double tRate = 1, string tModule = "", byte tUnposted = 1)
+{
+    try
+    {
+        if (tKredit < 0)
+        {
+            tDebet = -tKredit;
+            tKredit = 0;
+        }
+        else if (tDebet < 0)
+        {
+            tKredit = -tDebet;
+            tDebet = 0;
+        }
+        
+        if (tDebet + tKredit == 0)
+        {
+            return 1;
+        }
+
+        tDesc = ConvertAcn(tAcc, "A") + " - " + ConvertAcn(tSubAcc, "S");
+
+        using (YourDataContext dataContext = new YourDataContext()) // Replace YourDataContext with your actual data context class
+        {
+            GLTRANSUM newEntry = new GLTRANSUM
+            {
+                GLTRAN_Company = "", // Replace with the appropriate value
+                GLTRAN_ReffNumb = tReffNumber,
+                GLTRAN_LineNo = tLine,
+                GLTRAN_AccountCode = tAcc,
+                GLTRAN_JenisJurnal = tJenisJurnal,
+                GLTRAN_SubAccount = tSubAcc,
+                GLTRAN_TransDate = tDate,
+                GLTRAN_Entity = tEntity,
+                GLTRAN_Description = tDesc,
+                GLTRAN_Project = tProject,
+                GLTRAN_CurrencyCode = tCurr,
+                GLTRAN_DebitAmount = cNum(tDebet),
+                GLTRAN_CreditAmount = cNum(tKredit),
+                GLTRAN_BaseDebetAmount = cNum(tDebet),
+                GLTRAN_BaseCreditAmount = cNum(tKredit),
+                GLTRAN_CuEffDate = tDate,
+                GLTRAN_CuRate = tRate,
+                GLTRAN_FiscalYear = tYear,
+                GLTRAN_Module = tModule,
+                GLTRAN_PeriodEntry = tPeriodNumber,
+                GLTRAN_PeriodPost = tPeriodNumber,
+                GLTRAN_Unposted = tUnposted
+            };
+
+            dataContext.GLTRANSUM.InsertOnSubmit(newEntry);
+            dataContext.SubmitChanges();
+
+            return 1; // Assuming success
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        return 0; // Assuming failure
+    }
+}
+
+// Helper method to convert string to numeric value
+private double cNum(string input)
+{
+    double result;
+    if (double.TryParse(input, out result))
+    {
+        return result;
+    }
+    return 0;
+}

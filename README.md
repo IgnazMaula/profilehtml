@@ -73,3 +73,19 @@ private double cNum(string input)
     }
     return 0;
 }
+
+
+    Function ConvertAcn(ByVal acc As String, ByVal Acct As String) As String
+Dim rs As New ADODB.Recordset
+
+    If Acct = "A" Then
+        rs.Open "select * from MFCOA where MFCOA_Account = '" & acc & "' ", GDBConn, adOpenKeyset, adLockOptimistic, adCmdText
+        ConvertAcn = Trim(rs!MFCOA_Des)
+    Else
+        rs.Open "select * from MFSOAM where MFSOAM_SubAccountNbr = '" & acc & "' ", GDBConn, adOpenKeyset, adLockOptimistic, adCmdText
+        ConvertAcn = Trim(rs!MFSOAM_Description)
+    End If
+    rs.Close
+    
+End Function
+

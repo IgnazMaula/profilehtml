@@ -1,2 +1,19 @@
-  select isnull(Piutang.Piutang,0) as s, TRD_REAL_HTM.Kode as r, Piutang.Line as q, isnull(Piutang.Piutang, BungaHitung-Bunga-Piutang.Biaya) as p, Bank, NoRekening,* from trd_real_HTM left join Piutang on Type='HTM' and Piutang.Bilyet=TRD_REAL_HTM.Kode and Piutang.TanggalBunga=TRD_REAL_HTM.TanggalTerima
-  where TanggalTerima between '2022-08-01 00:00:00.000' and '2023-08-01 00:00:00.000' order by TanggalTerima desc
+var query = from trd in dbContext.TRD_REAL_HTM
+            join piutang in dbContext.Piutang on new { Kode = trd.Kode, TanggalBunga = trd.TanggalTerima, Type = "HTM" } equals new { piutang.Kode, piutang.TanggalBunga, piutang.Type } into piutangJoin
+            from piutang in piutangJoin.DefaultIfEmpty()
+            let pValue = piutang != null ? piutang.Piutang : (trd.BungaHitung - trd.Bunga - trd.Biaya)
+            where trd.TanggalTerima >= startDate && trd.TanggalTerima < endDate
+            orderby trd.TanggalTerima descending
+            select new
+            {
+                s = piutang != null ? piutang.Piutang : 0,
+                r = trd.Kode,
+                q = piutang != null ? piutang.Line : null,
+                p = pValue,
+                trd.Bank,
+                trd.NoRekening,
+                trd
+            };
+Please note that in the LINQ query, I assumed that you have a DataContext named dbContext that is used to interact with the database, and that the TRD_REAL_HTM and Piutang tables are represented as objects in the context. You might need to adjust the actual property
+
+

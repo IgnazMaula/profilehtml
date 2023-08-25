@@ -1,11 +1,33 @@
-Function cNum(ByVal tNum As Variant, Optional ByVal tPrec As Byte = 30) As String
-On Error GoTo err
-    cNum = "0"
-    cNum = Round(CDec(tNum), tPrec)
-    If Left(Format(0, "###.00"), 1) = "," Then
-        cNum = Replace(cNum, ",", ".", 1, 1)
-    End If
-    Exit Function
-err:
-    MsgBox err.Description
-End Function
+using System;
+
+public class Converter
+{
+    public static string CNum(object tNum, byte tPrec = 30)
+    {
+        try
+        {
+            string cNum = "0";
+            cNum = Math.Round(Convert.ToDecimal(tNum), tPrec).ToString();
+
+            if (Format(0, "###.00").Substring(0, 1) == ",")
+            {
+                cNum = cNum.Replace(",", ".", 1, 1);
+            }
+
+            return cNum;
+        }
+        catch (Exception ex)
+        {
+            // Handle the error in an appropriate way
+            Console.WriteLine(ex.Message);
+            return null; // You might want to return something meaningful here
+        }
+    }
+
+    // This function is used to mimic the Format behavior in VB
+    public static string Format(object expression, string format)
+    {
+        // Implement your own logic to format the expression as needed
+        throw new NotImplementedException();
+    }
+}

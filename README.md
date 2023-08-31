@@ -1,1 +1,8 @@
-select sum(totalsaham) as total from trd_saham where Kodesaham='tKode' and tanggalsaham <= 'tDate' and DP ='tdp' group by Kodesaham
+var total = dbContext.TrdSaham
+    .Where(s => s.Kodesaham == tKode && s.Tanggalsaham <= tDate && s.DP == tdp)
+    .GroupBy(s => s.Kodesaham)
+    .Select(g => new
+    {
+        Total = g.Sum(s => s.Totalsaham)
+    })
+    .FirstOrDefault()?.Total;

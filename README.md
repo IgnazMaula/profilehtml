@@ -1,1 +1,1 @@
-delete GLTRANSUM from GLTRANSUM inner join TRAKHIR on GLTRAN_ReffNumb=NoJurnal1 where TRAKHIR_Type='" & tipe & "' and TRAKHIR_Periode='" & Format(dtTanggal.Value, "yyyy/mm") & "'
+select sum(totalsaham) as total from trd_saham where Kodesaham='tKode' and tanggalsaham <= 'tDate' and DP ='tdp' group by Kodesaham

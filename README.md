@@ -1,6 +1,3 @@
-var query = from trdReal in context.TRD_REAL
-            join trdD in context.TRD_D on trdReal.NomorSuratBank equals trdD.NoSuratBank
-            join mfbnk in context.MFBNK on new { trdReal.TRD_D_Bank, trdReal.TRD_D_Branch } equals new { mfbnk.Bank_ID, mfbnk.Branch_ID }
-            where trdReal.DPCode == "DP Smart"
-            orderby trdReal.bilyet, trdReal.nomorsuratbank ascending
-            select trdReal;
+select distinct TRD_REAL.bilyet as bilyet,trd_real.nomorsuratbank as nomorsuratbank from TRD_REAL 
+left join TRD_D on NomorSuratBank=NoSuratBank 
+left join MFBNK on TRD_D_Bank=Bank_ID and TRD_D_Branch=Branch_ID where Periode='2007/10' and DPCode='DP Smart' order by bilyet,nomorsuratbank asc

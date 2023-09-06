@@ -1,12 +1,5 @@
-var result = (from trdReal in context.TRD_REAL
-              where trdReal.Periode == "2007/10" && trdReal.DPCode == "DP Smart"
-              join trdD in context.TRD_D on trdReal.NomorSuratBank equals trdD.NoSuratBank into trdDJoin
-              from trdD in trdDJoin.DefaultIfEmpty()
-              join mfbnk in context.MFBNK on new { trdReal.TRD_D_Bank, trdReal.TRD_D_Branch } equals new { mfbnk.Bank_ID, mfbnk.Branch_ID } into mfbnkJoin
-              from mfbnk in mfbnkJoin.DefaultIfEmpty()
-              orderby trdReal.bilyet, trdReal.nomorsuratbank
-              select new
-              {
-                  bilyet = trdReal.bilyet,
-                  nomorsuratbank = trdReal.nomorsuratbank
-              }).Distinct();
+     select distinct approvejt,trd_d_nos,trd_d_bank,trd_d_branch,trd_d_netamount, trd_D_DueDate from trd_d
+        where approve = 1 and cair = 0 and ro = 0
+        and year(TRD_D_DueDate)= '2023'
+        and month(TRD_D_DueDate)= '05'
+        and TRD_D_DP = 'DP Smart'

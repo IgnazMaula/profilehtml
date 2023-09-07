@@ -1,4 +1,4 @@
-// Subquery to fetch the data and calculate nominalJual
+// Subquery to calculate nominalJual
 var subqueryY = from b in context.TRD_OH_SBP
                 join m in context.MOBL on b.TRD_OH_Kode equals m.MOBL_Code
                 where m.MOBL_MaturityDate.Year == 2023 && m.MOBL_MaturityDate.Month == 7
@@ -22,26 +22,25 @@ var subqueryX = from y in subqueryY
                     y.TRD_OH_Kode,
                     y.MOBL_IssuedDate,
                     y.MOBL_MaturityDate,
-                    Nominal = y.nominalJual == 0 ? y.Nominal : y.Nominal + y.nominalJual
+                    y.Nominal,
+                    y.nominalJual
                 };
 
-// Main query to group and sum by specific fields
-var mainQuery = from x in subqueryX
-               group x by new
+// Perform the grouping and aggregation
+var result = subqueryX.GroupBy(x => new
                {
                    x.ApproveJT,
                    x.TRD_OH_Kode,
                    x.MOBL_IssuedDate,
                    x.MOBL_MaturityDate
-               } into g
-               orderby g.Key.MOBL_MaturityDate
-               select new
+               })
+               .Select(g => new
                {
                    g.Key.ApproveJT,
                    g.Key.TRD_OH_Kode,
-                   Nominal = g.Sum(x => x.Nominal),
+                   Nominal = g.Sum(x => x.Nominal + x.nominalJual),
                    g.Key.MOBL_IssuedDate,
                    g.Key.MOBL_MaturityDate
-               };
-
-var result = mainQuery.ToList();
+               })
+               .OrderBy(x => x.MOBL_MaturityDate)
+               .ToList();

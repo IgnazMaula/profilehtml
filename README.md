@@ -14,20 +14,11 @@ var subqueryY = from b in context.TRD_OH_SBP
                                    select (decimal?)s.Nominal).Sum() ?? 0
                 };
 
-// Subquery X to calculate Nominal based on nominalJual
-var subqueryX = from y in subqueryY
-                select new
-                {
-                    y.ApproveJT,
-                    y.TRD_OH_Kode,
-                    y.MOBL_IssuedDate,
-                    y.MOBL_MaturityDate,
-                    y.Nominal,
-                    y.nominalJual
-                };
+// Execute the subquery and project it to a list
+var subqueryYList = subqueryY.ToList();
 
-// Perform the grouping and aggregation
-var result = subqueryX.GroupBy(x => new
+// Perform the grouping and aggregation in memory
+var result = subqueryYList.GroupBy(x => new
                {
                    x.ApproveJT,
                    x.TRD_OH_Kode,

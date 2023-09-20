@@ -1,138 +1,84 @@
-Public Function BuatNomorMemo(ByVal tanggal As Date, ByVal jenis As String) As String
-On Error GoTo err
-Dim str As String, rs As New ADODB.Recordset, Angka As Double
-Dim bln As Double, Thn As Double
-using System;
-using System.Data;
-using System.Data.SqlClient;
+<body>
+    <div class="container">
+      <div class="hex central">
+        <div>
+         <h2>What we do on a...</h2>
+        <h1>Site Survey</h2>
+        </div>
+      </div>
+        <div class="hex top-left"></div>
+        <div class="hex top-right"></div>
+        <div class="hex middle-left"></div>
+        <div class="hex middle-right"></div>
+        <div class="hex bottom-left"></div>
+        <div class="hex bottom-right"></div>
+    </div>
+</body>
 
-public static class MemoNumberGenerator
-{
-    public static string GenerateMemoNumber(DateTime tanggal, string jenis)
-    {
-        string connectionString = "your_connection_string_here"; // Replace with your actual connection string
-        double bln = 0, Thn = 0;
-        double Angka;
-        
-        try
-        {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                string query = "SELECT * FROM bulan WHERE periode = @periode";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@periode", tanggal.ToString("yyyy/MM"));
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.HasRows)
-                        {
-                            reader.Read();
-                            Angka = Convert.ToDouble(reader["nomor"]);
-                        }
-                        else
-                        {
-                            Angka = 0;
-                            reader.Close();
-
-                            // Insert a new record if it doesn't exist
-                            string insertQuery = "INSERT INTO bulan (periode, nomor) VALUES (@periode, @nomor)";
-                            using (SqlCommand insertCommand = new SqlCommand(insertQuery, connection))
-                            {
-                                insertCommand.Parameters.AddWithValue("@periode", tanggal.ToString("yyyy/MM"));
-                                insertCommand.Parameters.AddWithValue("@nomor", Angka + 1);
-                                insertCommand.ExecuteNonQuery();
-                            }
-                        }
-                    }
-                }
-
-                bln = Angka + 1;
-
-                string yearQuery = "SELECT * FROM tahun WHERE tahun = @tahun";
-                using (SqlCommand yearCommand = new SqlCommand(yearQuery, connection))
-                {
-                    yearCommand.Parameters.AddWithValue("@tahun", tanggal.Year);
-                    using (SqlDataReader yearReader = yearCommand.ExecuteReader())
-                    {
-                        if (yearReader.HasRows)
-                        {
-                            yearReader.Read();
-                            Angka = Convert.ToDouble(yearReader["nomor"]);
-                        }
-                        else
-                        {
-                            Angka = 0;
-                            yearReader.Close();
-
-                            // Insert a new record if it doesn't exist
-                            string insertYearQuery = "INSERT INTO tahun (tahun, nomor) VALUES (@tahun, @nomor)";
-                            using (SqlCommand insertYearCommand = new SqlCommand(insertYearQuery, connection))
-                            {
-                                insertYearCommand.Parameters.AddWithValue("@tahun", tanggal.Year);
-                                insertYearCommand.Parameters.AddWithValue("@nomor", Angka + 1);
-                                insertYearCommand.ExecuteNonQuery();
-                            }
-                        }
-                    }
-                }
-
-                Thn = Angka + 1;
-            }
-        }
-        catch (Exception ex)
-        {
-            // Handle the exception as needed
-            Console.WriteLine(ex.Message);
-            return "";
-        }
-
-        return $"{bln}/{Thn}/{AngkaRomawi(tanggal.Month)}/{tanggal.Year}";
-    }
-
-    public static string AngkaRomawi(int angka)
-    {
-        // Implement your AngkaRomawi function here
-        // This function converts an integer to its Roman numeral representation
-        // For example, 1 to "I", 2 to "II", etc.
-        // You can find existing implementations of this function online.
-        // Return the Roman numeral representation of the given number.
-    }
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    background-color: #f0f0f0;
 }
 
-str = "select * from bulan where periode='" & Format(tanggal, "yyyy/mm") & "'"
-Set rs = Nothing
-rs.Open str, GDBConn, adOpenKeyset, adLockOptimistic
-If rs.EOF Then
-    rs.AddNew
-    Angka = 0
-Else
-    Angka = rs!nomor
-End If
-rs!periode = Format(tanggal, "yyyy/mm")
-rs!nomor = Angka + 1
-bln = Angka + 1
-rs.Update
+.container {
+    position: relative;
+}
 
-str = "select * from tahun where tahun=" & Year(tanggal)
-Set rs = Nothing
-rs.Open str, GDBConn, adOpenKeyset, adLockOptimistic
-If rs.EOF Then
-    rs.AddNew
-    Angka = 0
-Else
-    Angka = rs!nomor
-End If
-rs!tahun = Year(tanggal)
-rs!nomor = Angka + 1
-Thn = Angka + 1
-rs.Update
+.hex {
+    position: absolute;
+    width: 300px;
+    height: 320px;
+    background-color: #ffcc00;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    transform-origin: center;
+     text-align: center; /* Center text horizontally */
+     display: flex;
+      justify-content: center;
+     align-items: center;
+}
 
-BuatNomorMemo = bln & "/" & Thn & "/" & AngkaRomawi(Month(tanggal)) & "/" & Year(tanggal)
+.central {
+    background-color: red;
+    top: 0;
+    left: 0;
+    transform: translate(0, 0);
+}
 
-Exit Function
-err:
-BuatNomorMemo = ""
-MsgBox err.Description, vbInformation
-End Function
+.top-left {
+    top: -300px;
+    left: -200px;
+    transform: translate(0, 0);
+}
+
+.top-right {
+    top: -300px;
+    left: 200px;
+    transform: translate(0, 0);
+}
+
+.middle-left {
+    top: 0px;
+    left: -360px;
+    transform: translate(0, 0);
+}
+
+.middle-right {
+    top: 0px;
+    left: 360px;
+    transform: translate(0, 0);
+}
+
+.bottom-left {
+    top: 300px;
+    left: -200px;
+    transform: translate(0, 0);
+}
+
+.bottom-right {
+    top: 300px;
+    left: 200px;
+    transform: translate(0, 0);
+}

@@ -1715,3 +1715,5 @@ section {
   font-size: 13px;
   color: #fff;
 }
+
+So first we will try to assign asset to a product. Go to asset menu, select one of the assets that we want to add the product into. Important to note that only asset with type of Perishable asset that can be added with product. So, we select the product, in here we can assign the product by selecting which category the product is, now select the product to add and set the quantity, add save and now the asset should update the assigned product with the quantity. You can also change the quantity of the product by adding the same product with different quantity for example we will add 4 products to product A and we want to reduce 2 products from product C. Click save and the product in asset quantity should be updated. Another feature that we will discuss is A log and B log, this log page is accessible by choosing log A or log B from the selected asset
